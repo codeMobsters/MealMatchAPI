@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MealMatchAPI", "MealMatchAPI\MealMatchAPI.csproj", "{59EC7F8E-5140-4A23-8137-1A363F98C226}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59EC7F8E-5140-4A23-8137-1A363F98C226}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59EC7F8E-5140-4A23-8137-1A363F98C226}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59EC7F8E-5140-4A23-8137-1A363F98C226}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59EC7F8E-5140-4A23-8137-1A363F98C226}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
