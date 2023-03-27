@@ -12,122 +12,117 @@ namespace MealMatchAPI.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class RecipesController : ControllerBase
+    public class CommentsController : ControllerBase
     {
         private readonly IRepositories _repositories;
-        private readonly IMapper _mapper;
 
-        public RecipesController(IRepositories repositories, IMapper mapper)
+        public CommentsController(IRepositories repositories)
         {
             _repositories = repositories;
-            _mapper = mapper;
         }
 
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<RecipeTransfer>>> GetRecipes()
+        public async Task<ActionResult<List<Comment>>> GetComments() // byUserId
         {
-            if (_repositories.Recipe == null)
+            if (_repositories.Comment == null)
             {
                 return NotFound();
             }
-        
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var comments = await _repositories.Comment.GetAllAsync(comment =>
+                comment.UserId == GetIdFromToken(token));
             
-        
-            var recipes =await _repositories.Recipe.GetAllAsync(recipe => recipe.UserId == GetIdFromToken(token));
-            return recipes.Select(recipe => _mapper.Map<RecipeTransfer>(recipe)).ToList();
+            if (comments == null)
+            {
+                return NotFound();
+            }
+            return Ok(comments);
         }
         
-        [HttpGet("{id}")]
+        [HttpGet("{recipeId}")]
         [Authorize]
-        public async Task<ActionResult<RecipeTransfer>> GetRecipe(int id)
+        public async Task<ActionResult<List<Comment>>> GetCommentByRecipeId(int recipeId)
         {
             if (_repositories.Recipe == null)
             {
                 return NotFound();
             }
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
             
-            var recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(c => 
-                c.UserId == GetIdFromToken(token) && c.RecipeId == id
+            var comments = await _repositories.Comment.GetAllAsync(c => 
+                c.RecipeId == recipeId
             );
         
-            if (recipe == null)
+            if (comments == null)
             {
                 return NotFound();
             }
         
-            return _mapper.Map<RecipeTransfer>(recipe);
+            return Ok(comments);
         }
         
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Recipe>> PostRecipe(RecipeTransfer newRecipe)
+        public async Task<ActionResult<Comment>> PostComment(Comment request)
         {
-            if (_repositories.Recipe == null)
+            if (_repositories.Comment == null)
             {
-                return Problem("Entity set 'RecipeContext.Recipe'  is null.");
+                return Problem("Entity set 'CommentContext.Recipe'  is null.");
             }
             
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
             
-            var recipe = _mapper.Map<Recipe>(newRecipe);
-            recipe.RecipeId = 0;
-            recipe.UserId = GetIdFromToken(token);
-            recipe.CreatedAt = DateTime.Now;
+            request.UserId = GetIdFromToken(token);
+            request.CommentAt = DateTime.Now;
         
-            await _repositories.Recipe.AddAsync(recipe);
+            await _repositories.Comment.AddAsync(request);
             await _repositories.Save();
         
-            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+            return CreatedAtAction("GetCommentByRecipeId", new { recipeId = request.RecipeId }, request);
         }
         
-        [HttpPut("{id}")]
+        [HttpPut("{commentId}")]
         [Authorize]
-        public async Task<IActionResult> PutRecipe(int id, [FromBody] RecipeTransfer updatedRecipe)
+        public async Task<IActionResult> UpdateComment(int commentId, [FromBody] Comment request)
         {
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            if (id != updatedRecipe.RecipeId || updatedRecipe.UserId != GetIdFromToken(token))
+            if (commentId != request.CommentId || request.UserId != GetIdFromToken(token))
             {
                 return BadRequest();
             }
-            var recipe = _mapper.Map<Recipe>(updatedRecipe);
-        
             try
             {
-                _repositories.Recipe.Update(recipe);
+                _repositories.Comment.Update(request);
                 await _repositories.Save();
             }
             catch (DbUpdateConcurrencyException)
             {
                 return NotFound();
             }
-        
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{commentId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteRecipe(int id)
+        public async Task<IActionResult> DeleteComment(int commentId)
         {
-            if (_repositories.Recipe == null)
+            if (_repositories.Comment == null)
             {
                 return NotFound();
             }
             
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
         
-            var recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r =>
-                r.RecipeId == id && r.UserId == GetIdFromToken(token)
+            var comment = await _repositories.Comment.GetFirstOrDefaultAsync(r =>
+                r.CommentId == commentId && r.UserId == GetIdFromToken(token)
             );
             
-            if (recipe == null)
+            if (comment == null)
             {
                 return NotFound();
             }
         
-            _repositories.Recipe.Delete(recipe);
+            _repositories.Comment.Delete(comment);
             await _repositories.Save();
         
             return NoContent();

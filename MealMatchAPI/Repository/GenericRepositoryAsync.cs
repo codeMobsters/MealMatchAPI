@@ -27,7 +27,7 @@ public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : cl
         return await query.ToListAsync();
     }
     
-    public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter)
+    public virtual async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter)
     {
         IQueryable<T> query = DbSet;
 
