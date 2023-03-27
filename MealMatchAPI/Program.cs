@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
 });
 
 // Add Authentication
-var key = builder.Configuration.GetValue<String>("ApiSettings:Secret");
+var key = builder.Configuration.GetValue<String>("JWTSecretKey");
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

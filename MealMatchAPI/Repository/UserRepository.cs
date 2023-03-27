@@ -19,7 +19,7 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
     public UserRepository(ApplicationDbContext db, IConfiguration configuration) : base(db)
     {
         _db = db;
-        _secretKey = configuration.GetValue<String>("ApiSettings:Secret");
+        _secretKey = configuration.GetValue<String>("JWTSecretKey");
     }
 
     public bool IsUniqueUser(string userName)
