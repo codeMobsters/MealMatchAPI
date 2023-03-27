@@ -1,9 +1,11 @@
+using MealMatchAPI.Models.APIModels;
 using MealMatchAPI.Models.DTOs;
 
 namespace MealMatchAPI.Services
 {
   public interface IEdamamApiService
   {
-    Task<RecipeTransfer> GetRecipesFromApi();
+    Task<List<RecipeTransfer>> GetRecipesFromApi();
+    Task<List<RecipeTransfer>> GetQueriedRecipesFromApi(RecipeQuery query);
   }
 }

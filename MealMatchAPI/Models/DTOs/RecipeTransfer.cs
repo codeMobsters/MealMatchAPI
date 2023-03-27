@@ -4,12 +4,12 @@ namespace MealMatchAPI.Models.DTOs;
 
 public class RecipeTransfer
 {
-    public int RecipeId { get; set; }
+    public int? RecipeId { get; set; }
     [JsonPropertyName("label")]
     public string Title { get; set; }
     public int? Like { get; set; }
     [JsonPropertyName("yield")]
-    public int? Yield { get; set; }
+    public double? Yield { get; set; }
     [JsonPropertyName("calories")]
     public double? Calories { get; set; }
     [JsonPropertyName("totalTime")]
@@ -35,6 +35,5 @@ public class RecipeTransfer
 
     public int UserId { get; set; } // Author of the recipe
     public string? Username { get; set; } // Author of the recipe
-    public User User { get; set; }
     public List<Comment>? Comments { get; set; }
 }

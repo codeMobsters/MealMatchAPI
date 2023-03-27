@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // AutoMapper and UnitOfWork
 builder.Services.AddAutoMapper(typeof(MapperProfile));
 builder.Services.AddScoped<IRepositories, Repositories>();
+builder.Services.AddScoped<IEdamamApiService, EdamamApiService>();
 
 // Add CORS
 const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
