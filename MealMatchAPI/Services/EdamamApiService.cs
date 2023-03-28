@@ -65,6 +65,10 @@ namespace MealMatchAPI.Services
         {
             var query = "";
             
+            if (!String.IsNullOrEmpty(recipeQuery.SearchTerm))
+            {
+                query += $"&q={recipeQuery.SearchTerm.ToLower()}";
+            }
             recipeQuery.CuisineType?.ForEach(cuisineType => query += $"&cuisineType={cuisineType.ToLower()}");
             recipeQuery.DietLabels?.ForEach(dietLabel => query += $"&diet={dietLabel.ToLower()}");
             recipeQuery.HealthLabels?.ForEach(healthLabel => query += $"&health={healthLabel.ToLower()}");

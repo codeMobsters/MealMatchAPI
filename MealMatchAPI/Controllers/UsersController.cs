@@ -48,6 +48,30 @@ namespace MealMatchAPI.Controllers
             return Ok();
         }
         
+        [HttpGet]
+        [Authorize]
+        public async Task<ActionResult<List<User>>> GetUsers()
+        {
+            if (_repositories.User == null)
+            {
+                return NotFound();
+            }
+            
+            return await _repositories.User.GetAllAsync();
+        }
+
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<ActionResult<User>> GetUserById(int id)
+        {
+            if (_repositories.User == null)
+            {
+                return NotFound();
+            }
+
+            return await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);;
+        }
+        
         [HttpGet("favoriterecipes")]
         [Authorize]
         public async Task<ActionResult<List<RecipeTransfer>>> GetFavoriteRecipes()

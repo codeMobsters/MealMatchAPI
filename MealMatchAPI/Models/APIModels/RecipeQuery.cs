@@ -2,6 +2,7 @@ namespace MealMatchAPI.Models.APIModels;
 
 public class RecipeQuery
 {
+    public string? SearchTerm { get; set; }
     public List<string>? CuisineType { get; set; }
     public List<string>? DietLabels { get; set; }
     public List<string>? DishType { get; set; }

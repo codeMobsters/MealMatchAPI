@@ -38,7 +38,7 @@ namespace MealMatchAPI.Controllers
             return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
         }
         
-        [HttpGet("{recipeId}")]
+        [HttpGet("recipe/{recipeId}")]
         [Authorize]
         public async Task<ActionResult<List<CommentTransfer>>> GetCommentByRecipeId(int recipeId)
         {
@@ -49,6 +49,22 @@ namespace MealMatchAPI.Controllers
             
             var comments = await _repositories.Comment.GetAllAsync(c => 
                 c.RecipeId == recipeId
+            );
+
+            return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
+        }
+        
+        [HttpGet("{commentId}")]
+        [Authorize]
+        public async Task<ActionResult<List<CommentTransfer>>> GetCommentByCommentId(int commentId)
+        {
+            if (_repositories.Comment == null)
+            {
+                return NotFound();
+            }
+            
+            var comments = await _repositories.Comment.GetAllAsync(c => 
+                c.CommentId == commentId
             );
 
             return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();

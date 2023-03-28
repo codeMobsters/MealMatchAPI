@@ -143,13 +143,15 @@ namespace MealMatchAPI.Controllers
         [HttpGet("Edamam")]
         [Authorize]
         public async Task<ActionResult<List<RecipeTransfer>>> GetEdamamRecipes(
+            [FromQuery] string? SearchTerm,
             [FromQuery] List<string>? cuisineType,
             [FromQuery] List<string>? dietLabel,
             [FromQuery] List<string>? healthLabel,
             [FromQuery] List<string>? mealType,
             [FromQuery] List<string>? dishType)
         {
-            if (cuisineType.IsNullOrEmpty() &&
+            if (string.IsNullOrEmpty(SearchTerm) &&
+                cuisineType.IsNullOrEmpty() &&
                 dietLabel.IsNullOrEmpty() &&
                 healthLabel.IsNullOrEmpty() &&
                 mealType.IsNullOrEmpty() &&
@@ -160,6 +162,7 @@ namespace MealMatchAPI.Controllers
 
             var recipeQuery = new RecipeQuery()
             {
+                SearchTerm = SearchTerm,
                 CuisineType = cuisineType,
                 DietLabels = dietLabel,
                 DishType = dishType,
