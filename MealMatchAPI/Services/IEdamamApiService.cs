@@ -5,7 +5,8 @@ namespace MealMatchAPI.Services
 {
   public interface IEdamamApiService
   {
-    Task<List<RecipeTransfer>> GetRecipesFromApi();
-    Task<List<RecipeTransfer>> GetQueriedRecipesFromApi(RecipeQuery query);
+    Task<EdamamResponse> GetRecipesFromApi();
+    Task<EdamamResponse> GetQueriedRecipesFromApi(RecipeQuery query);
+    Task<EdamamResponse> GetNextRecipesFromApi(string nextUrl);
   }
 }

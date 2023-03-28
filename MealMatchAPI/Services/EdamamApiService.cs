@@ -8,89 +8,88 @@ namespace MealMatchAPI.Services
     {
         private readonly string _secretId;
         private readonly string _secretKey;
-        private readonly List<string> _cuisineTypes;
 
         public EdamamApiService(IConfiguration configuration)
         {
-            _secretId = configuration.GetValue<String>("EdamamAPI_ID");
-            _secretKey = configuration.GetValue<String>("EdamamAPI_Key");
-            _cuisineTypes = new List<string>
-            {
-                "american",
-                "asian",
-                "british",
-                "caribbean",
-                "central europe",
-                "chinese",
-                "eastern europe",
-                "french",
-                "greek",
-                "indian",
-                "italian",
-                "japanese",
-                "korean",
-                "kosher",
-                "mediterranean",
-                "mexican",
-                "middle eastern",
-                "nordic",
-                "south american",
-                "south east asian",
-                "world"
-            };
+            _secretId = configuration.GetValue<String>("EdamamAPI_ID")!;
+            _secretKey = configuration.GetValue<String>("EdamamAPI_Key")!;
         }
 
-        public async Task<List<RecipeTransfer>> GetRecipesFromApi()
+        public async Task<EdamamResponse> GetRecipesFromApi()
         {
-            var cuisine = _cuisineTypes[new Random().Next(_cuisineTypes.Count)];
-            var client = new HttpClient();
-            var request = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri =
-                    new Uri(
-                        $"https://api.edamam.com/api/recipes/v2?type=public&app_id={_secretId}&app_key=%20{_secretKey}&cuisineType={cuisine}"),
-            };
-
-            using (var response = await client.SendAsync(request))
-            {
-                response.EnsureSuccessStatusCode();
-                var body = await response.Content.ReadAsStreamAsync();
-                var modelResponse = await JsonSerializer.DeserializeAsync<ApiResponse>(body);
-                return modelResponse.Hits.Select(hit => hit.Recipe).ToList();
-            }
-        }
-
-        public async Task<List<RecipeTransfer>> GetQueriedRecipesFromApi(RecipeQuery recipeQuery)
-        {
-            var query = "";
+            var cuisine = CuisineTypes[new Random().Next(CuisineTypes.Count)];
+            var url =
+                $"https://api.edamam.com/api/recipes/v2?type=public&app_id={_secretId}&app_key=%20{_secretKey}&cuisineType={cuisine}";
             
+            return await CallApi(url);
+        }
+
+        public async Task<EdamamResponse> GetQueriedRecipesFromApi(RecipeQuery recipeQuery)
+        {
+            var url = $"https://api.edamam.com/api/recipes/v2?type=public&app_id={_secretId}&app_key=%20{_secretKey}";
+
             if (!String.IsNullOrEmpty(recipeQuery.SearchTerm))
             {
-                query += $"&q={recipeQuery.SearchTerm.ToLower()}";
+                url += $"&q={recipeQuery.SearchTerm.ToLower()}";
             }
-            recipeQuery.CuisineType?.ForEach(cuisineType => query += $"&cuisineType={cuisineType.ToLower()}");
-            recipeQuery.DietLabels?.ForEach(dietLabel => query += $"&diet={dietLabel.ToLower()}");
-            recipeQuery.HealthLabels?.ForEach(healthLabel => query += $"&health={healthLabel.ToLower()}");
-            recipeQuery.MealType?.ForEach(mealType => query += $"&mealType={mealType.ToLower()}");
-            recipeQuery.DishType?.ForEach(dishType => query += $"&dishType={dishType.ToLower()}");
-            
+
+            recipeQuery.CuisineType?.ForEach(cuisineType => url += $"&cuisineType={cuisineType.ToLower()}");
+            recipeQuery.DietLabels?.ForEach(dietLabel => url += $"&diet={dietLabel.ToLower()}");
+            recipeQuery.HealthLabels?.ForEach(healthLabel => url += $"&health={healthLabel.ToLower()}");
+            recipeQuery.MealType?.ForEach(mealType => url += $"&mealType={mealType.ToLower()}");
+            recipeQuery.DishType?.ForEach(dishType => url += $"&dishType={dishType.ToLower()}");
+
+            return await CallApi(url);
+        }
+
+        public async Task<EdamamResponse> GetNextRecipesFromApi(string nextUrl)
+        {
+            return await CallApi(nextUrl);
+        }
+
+        private async Task<EdamamResponse> CallApi(string url)
+        {
             var client = new HttpClient();
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri =
-                    new Uri(
-                        $"https://api.edamam.com/api/recipes/v2?type=public&app_id={_secretId}&app_key=%20{_secretKey}{query}"),
+                RequestUri = new Uri(url)
             };
 
-            using (var response = await client.SendAsync(request))
+            using var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var body = await response.Content.ReadAsStreamAsync();
+            var modelResponse = await JsonSerializer.DeserializeAsync<ApiResponse>(body);
+            return new EdamamResponse()
             {
-                response.EnsureSuccessStatusCode();
-                var body = await response.Content.ReadAsStreamAsync();
-                var modelResponse = await JsonSerializer.DeserializeAsync<ApiResponse>(body);
-                return modelResponse.Hits.Select(hit => hit.Recipe).ToList();
-            }
+                Url = modelResponse?.Links.Next.Url,
+                Recipes = modelResponse?.Hits.Select(hit => hit.Recipe).ToList()
+            };
         }
+        
+        private static readonly IReadOnlyList<string> CuisineTypes = new[] 
+        {
+            "american",
+            "asian",
+            "british",
+            "caribbean",
+            "central europe",
+            "chinese",
+            "eastern europe",
+            "french",
+            "greek",
+            "indian",
+            "italian",
+            "japanese",
+            "korean",
+            "kosher",
+            "mediterranean",
+            "mexican",
+            "middle eastern",
+            "nordic",
+            "south american",
+            "south east asian",
+            "world"
+        };
     }
 }

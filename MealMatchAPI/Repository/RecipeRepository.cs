@@ -28,6 +28,20 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
             .ToListAsync();
     }
     
+    public override async Task<List<Recipe>> GetPagedReponseAsync(int pageNumber, Expression<Func<Recipe, bool>>? filter = null, int pageSize = 20)
+    {
+        IQueryable<Recipe> query = _db.Recipes;
+        if (filter != null)
+        {
+            query = _db.Recipes.Where(filter);
+        }
+        return await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+    
     public override async Task<Recipe?> GetByIdAsync(int id)
     {
         return await _db.Recipes

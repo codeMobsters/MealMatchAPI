@@ -27,6 +27,22 @@ public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : cl
         return await query.ToListAsync();
     }
     
+    public virtual async Task<List<T>> GetPagedReponseAsync(int pageNumber, Expression<Func<T, bool>>? filter = null, int pageSize = 20)
+    {
+        IQueryable<T> query = DbSet;
+        
+        if (filter != null)
+        {
+            query = DbSet.Where(filter);
+        }
+        
+        return await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+    
     public virtual async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter)
     {
         IQueryable<T> query = DbSet;

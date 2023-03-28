@@ -56,18 +56,25 @@ namespace MealMatchAPI.Controllers
         
         [HttpGet("{commentId}")]
         [Authorize]
-        public async Task<ActionResult<List<CommentTransfer>>> GetCommentByCommentId(int commentId)
+        public async Task<ActionResult<CommentTransfer>> GetCommentByCommentId(int commentId)
         {
             if (_repositories.Comment == null)
             {
                 return NotFound();
             }
-            
-            var comments = await _repositories.Comment.GetAllAsync(c => 
-                c.CommentId == commentId
+
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+            var comment = await _repositories.Comment.GetFirstOrDefaultAsync(c =>
+                c.UserId == GetIdFromToken(token) && c.CommentId == commentId
             );
 
-            return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
+            if (comment == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<CommentTransfer>(comment);
         }
         
         [HttpPost]
@@ -87,7 +94,7 @@ namespace MealMatchAPI.Controllers
             await _repositories.Comment.AddAsync(request);
             await _repositories.Save();
         
-            return CreatedAtAction("GetCommentByRecipeId", new { recipeId = request.RecipeId }, _mapper.Map<CommentTransfer>(request));
+            return CreatedAtAction("GetCommentByCommentId", new { recipeId = request.RecipeId }, _mapper.Map<CommentTransfer>(request));
         }
         
         [HttpPut("{commentId}")]

@@ -1,6 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
 using AutoMapper;
-using MealMatchAPI.Data;
 using MealMatchAPI.Models;
 using MealMatchAPI.Models.APIModels;
 using MealMatchAPI.Models.DTOs;
@@ -55,8 +54,8 @@ namespace MealMatchAPI.Controllers
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            var recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(c =>
-                c.UserId == GetIdFromToken(token) && c.RecipeId == id
+            var recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r =>
+                r.UserId == GetIdFromToken(token) && r.RecipeId == id
             );
 
             if (recipe == null)
@@ -142,7 +141,7 @@ namespace MealMatchAPI.Controllers
 
         [HttpGet("Edamam")]
         [Authorize]
-        public async Task<ActionResult<List<RecipeTransfer>>> GetEdamamRecipes(
+        public async Task<ActionResult<EdamamResponse>> GetEdamamRecipes(
             [FromQuery] string? SearchTerm,
             [FromQuery] List<string>? cuisineType,
             [FromQuery] List<string>? dietLabel,
@@ -171,6 +170,13 @@ namespace MealMatchAPI.Controllers
             };
 
             return await _edamamApiService.GetQueriedRecipesFromApi(recipeQuery);
+        }
+
+        [HttpGet("Edamam/Next")]
+        [Authorize]
+        public async Task<ActionResult<EdamamResponse>> GetEdamamRecipes(string nextUrl)
+        {
+            return await _edamamApiService.GetNextRecipesFromApi(nextUrl);
         }
 
         private int GetIdFromToken(string token)
