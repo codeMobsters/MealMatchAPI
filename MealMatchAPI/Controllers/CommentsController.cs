@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MealMatchAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CommentsController : ControllerBase
     {

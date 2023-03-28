@@ -61,4 +61,16 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
             .Include(recipe => recipe.User)
             .FirstOrDefaultAsync();
     }
+    
+    public override Recipe? GetFirstOrDefault(Expression<Func<Recipe, bool>> filter)
+    {
+        IQueryable<Recipe> query = _db.Recipes;
+
+        query = query.Where(filter);
+
+        return query
+            .Include(recipe => recipe.Comments)
+            .Include(recipe => recipe.User)
+            .FirstOrDefault();
+    }
 }

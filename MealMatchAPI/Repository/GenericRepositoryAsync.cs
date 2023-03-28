@@ -51,6 +51,15 @@ public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : cl
 
         return await query.FirstOrDefaultAsync();
     }
+    
+    public virtual T GetFirstOrDefault(Expression<Func<T, bool>> filter)
+    {
+        IQueryable<T> query = DbSet;
+
+        query = query.Where(filter);
+
+        return query.FirstOrDefault();
+    }
 
     public virtual async Task<T> GetByIdAsync(int id)
     {

@@ -6,10 +6,11 @@ using MealMatchAPI.Models.DTOs;
 using MealMatchAPI.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MealMatchAPI.Controllers
 {
-    [Route("api/UsersAuthentication")]
+    [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -22,7 +23,7 @@ namespace MealMatchAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Authentication/login")]
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest loginRequest)
         {
             var loginResponse = await _repositories.User.Login(loginRequest);
@@ -33,7 +34,7 @@ namespace MealMatchAPI.Controllers
             return loginResponse;
         }
         
-        [HttpPost("register")]
+        [HttpPost("Authentication/register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequest registrationRequest)
         {
             if (!_repositories.User.IsUniqueUser(registrationRequest.Username))
@@ -69,10 +70,10 @@ namespace MealMatchAPI.Controllers
                 return NotFound();
             }
 
-            return await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);;
+            return await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
         }
         
-        [HttpGet("favoriterecipes")]
+        [HttpGet("favoriteRecipes")]
         [Authorize]
         public async Task<ActionResult<List<RecipeTransfer>>> GetFavoriteRecipes()
         {
@@ -97,8 +98,9 @@ namespace MealMatchAPI.Controllers
             }
 
             var recipes = favorites.Select(fav =>
-                _repositories.Recipe.GetFirstOrDefaultAsync(recipe =>
+                 _repositories.Recipe.GetFirstOrDefault(recipe =>
                     recipe.RecipeId == Int32.Parse(fav))).ToList();
+            
 
             if (recipes == null)
             {
@@ -110,7 +112,7 @@ namespace MealMatchAPI.Controllers
         
         [HttpGet("recipes")]
         [Authorize]
-        public async Task<ActionResult<List<Recipe>>> GetRecipes()
+        public async Task<ActionResult<List<Recipe>>> GetUserRecipes()
         {
             if (_repositories.Recipe == null)
             {
@@ -127,7 +129,7 @@ namespace MealMatchAPI.Controllers
         
         [HttpGet("comments")]
         [Authorize]
-        public async Task<ActionResult<List<Comment>>> GetComments()
+        public async Task<ActionResult<List<Comment>>> GetUserComments()
         {
             if (_repositories.Comment == null)
             {
@@ -140,6 +142,62 @@ namespace MealMatchAPI.Controllers
             );
 
             return Ok(comments);
+        }
+        
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> PutRecipe(int id, [FromBody] UserUpdateRequest updatedUser)
+        {
+            if (_repositories.User == null)
+            {
+                return NotFound();
+            }
+            
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            
+            if (id != GetIdFromToken(token))
+            {
+                return BadRequest();
+            }
+
+            var user =  await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
+            
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            user.Name = updatedUser.Name ?? user.Name;
+            
+            user.Favorites = updatedUser.ProfilePictureUrl ?? user.ProfilePictureUrl;
+
+            user.Favorites = updatedUser.Favorites == null
+                ? user.Favorites
+                : String.Join("<//>", updatedUser.Favorites);
+            
+            user.ProfileSettings = updatedUser.ProfileSettings == null
+                ? user.ProfileSettings
+                : String.Join("<//>", updatedUser.ProfileSettings);
+            
+            user.HealthLabels = updatedUser.HealthLabels == null
+                ? user.HealthLabels
+                : String.Join("<//>", updatedUser.HealthLabels);
+            
+            user.DietLabels = updatedUser.DietLabels == null
+                ? user.DietLabels
+                : String.Join("<//>", updatedUser.DietLabels);
+        
+            try
+            {
+                _repositories.User.Update(user);
+                await _repositories.Save();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+        
+            return NoContent();
         }
         
         private int GetIdFromToken(string token)
