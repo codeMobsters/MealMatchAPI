@@ -34,7 +34,7 @@ public class Recipe
     [Required]
     public int UserId { get; set; } // Author of the recipe
     [ValidateNever]
-    public User User { get; set; }
+    public virtual User User { get; set; }
     [ValidateNever]
     public List<Comment>? Comments { get; set; }
 }

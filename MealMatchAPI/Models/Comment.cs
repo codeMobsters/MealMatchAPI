@@ -19,8 +19,7 @@ public class Comment
     [Required]
     public int UserId { get; set; } // Author of the comment
     [ValidateNever]
-    [JsonIgnore]
-    public User User { get; set; }
+    public virtual User User { get; set; }
     
     [ForeignKey("Recipe")]
     [Required]

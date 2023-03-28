@@ -23,6 +23,9 @@ public class MapperProfile : Profile
             .ForMember(d => d.DishType, opt => opt.ConvertUsing(new ListConverter()))
             .ForMember(d => d.HealthLabels, opt => opt.ConvertUsing(new ListConverter()))
             .ForMember(d => d.MealType, opt => opt.ConvertUsing(new ListConverter()));
+
+        CreateMap<Comment, CommentTransfer>();
+        CreateMap<CommentTransfer, Comment>();
     }
     
     private class StringConverter : IValueConverter<List<string>, string> {

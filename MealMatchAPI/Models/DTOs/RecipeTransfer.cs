@@ -34,6 +34,6 @@ public class RecipeTransfer
     public string? SourceUrl { get; set; }
 
     public int UserId { get; set; } // Author of the recipe
-    public string? Username { get; set; } // Author of the recipe
-    public List<Comment>? Comments { get; set; }
+    public string? UserName { get; set; } // Author of the recipe
+    public List<CommentTransfer>? Comments { get; set; }
 }
