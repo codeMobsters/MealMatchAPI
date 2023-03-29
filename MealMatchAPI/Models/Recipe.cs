@@ -15,10 +15,12 @@ public class Recipe
     public int? Like { get; set; }
     public int? Yield { get; set; }
     public double? Calories { get; set; }
-    public double TotalTime { get; set; }
+    public double? TotalTime { get; set; }
     [Required]
     public DateTime CreatedAt { get; set; }
     
+    public string? Instructions { get; set; }
+
     public string Ingredients { get; set; }
     public string? CuisineType { get; set; }
     public string? DietLabels { get; set; }

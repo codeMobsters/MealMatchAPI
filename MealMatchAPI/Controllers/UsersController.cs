@@ -4,6 +4,7 @@ using MealMatchAPI.Data;
 using MealMatchAPI.Models;
 using MealMatchAPI.Models.DTOs;
 using MealMatchAPI.Repository.IRepository;
+using MealMatchAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +17,13 @@ namespace MealMatchAPI.Controllers
     {
         private readonly IRepositories _repositories;
         private readonly IMapper _mapper;
+        private readonly IImageStorageService _imageStorageService;
 
-        public UsersController(IRepositories repositories, IMapper mapper)
+        public UsersController(IRepositories repositories, IMapper mapper, IImageStorageService imageStorageService)
         {
             _repositories = repositories;
             _mapper = mapper;
+            _imageStorageService = imageStorageService;
         }
 
         [HttpPost("Authentication/login")]
@@ -72,44 +75,7 @@ namespace MealMatchAPI.Controllers
 
             return await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
         }
-        
-        [HttpGet("favoriteRecipes")]
-        [Authorize]
-        public async Task<ActionResult<List<RecipeTransfer>>> GetFavoriteRecipes()
-        {
-            if (_repositories.Recipe == null)
-            {
-                return NotFound();
-            }
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            
-            var user = await _repositories.User.GetFirstOrDefaultAsync(user => 
-                user.UserId == GetIdFromToken(token)
-            );
-            if (user == null)
-            {
-                return NotFound();
-            }
 
-            var favorites = user.Favorites?.Split("<//>").ToList();
-            if (favorites == null)
-            {
-                return NotFound();
-            }
-
-            var recipes = favorites.Select(fav =>
-                 _repositories.Recipe.GetFirstOrDefault(recipe =>
-                    recipe.RecipeId == Int32.Parse(fav))).ToList();
-            
-
-            if (recipes == null)
-            {
-                return NotFound();
-            }
-
-            return recipes.Select(recipe => _mapper.Map<RecipeTransfer>(recipe)).ToList();
-        }
-        
         [HttpGet("recipes")]
         [Authorize]
         public async Task<ActionResult<List<Recipe>>> GetUserRecipes()
@@ -146,7 +112,8 @@ namespace MealMatchAPI.Controllers
         
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> PutRecipe(int id, [FromBody] UserUpdateRequest updatedUser)
+        [Consumes("multipart/form-data")] 
+        public async Task<IActionResult> PutUser(int id, [FromForm] UserUpdateRequest updatedUser)
         {
             if (_repositories.User == null)
             {
@@ -168,13 +135,18 @@ namespace MealMatchAPI.Controllers
             }
             
             user.Name = updatedUser.Name ?? user.Name;
-            
-            user.Favorites = updatedUser.ProfilePictureUrl ?? user.ProfilePictureUrl;
 
-            user.Favorites = updatedUser.Favorites == null
-                ? user.Favorites
-                : String.Join("<//>", updatedUser.Favorites);
-            
+            if (updatedUser.ProfilePicture != null)
+            {
+                if (user.ProfilePictureUrl != null)
+                {
+                    await _imageStorageService.DeleteFile(user.ProfilePictureUrl);
+                }
+                
+                user.ProfilePictureUrl = await _imageStorageService.UploadFile(updatedUser.ProfilePicture.OpenReadStream(),
+                    updatedUser.ProfilePicture.FileName, updatedUser.ProfilePicture.ContentType);
+            }
+
             user.ProfileSettings = updatedUser.ProfileSettings == null
                 ? user.ProfileSettings
                 : String.Join("<//>", updatedUser.ProfileSettings);

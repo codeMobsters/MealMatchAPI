@@ -19,12 +19,14 @@ namespace MealMatchAPI.Controllers
         private readonly IRepositories _repositories;
         private readonly IMapper _mapper;
         private readonly IEdamamApiService _edamamApiService;
+        private readonly IImageStorageService _imageStorageService;
 
-        public RecipesController(IRepositories repositories, IMapper mapper, IEdamamApiService edamamApiService)
+        public RecipesController(IRepositories repositories, IMapper mapper, IEdamamApiService edamamApiService, IImageStorageService imageStorageService)
         {
             _repositories = repositories;
             _mapper = mapper;
             _edamamApiService = edamamApiService;
+            _imageStorageService = imageStorageService;
         }
 
         [HttpGet]
@@ -81,6 +83,31 @@ namespace MealMatchAPI.Controllers
             recipe.RecipeId = 0;
             recipe.UserId = GetIdFromToken(token);
             recipe.CreatedAt = DateTime.Now;
+
+            await _repositories.Recipe.AddAsync(recipe);
+            await _repositories.Save();
+
+            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+        }
+        
+        [HttpPost("New")]
+        [Authorize]
+        [Consumes("multipart/form-data")] 
+        public async Task<ActionResult<Recipe>> PostNewRecipe([FromForm]NewRecipe newRecipe)
+        {
+            if (_repositories.Recipe == null)
+            {
+                return Problem("Entity set 'RecipeContext.Recipe'  is null.");
+            }
+
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+            var recipe = _mapper.Map<Recipe>(newRecipe);
+            recipe.RecipeId = 0;
+            recipe.UserId = GetIdFromToken(token);
+            recipe.CreatedAt = DateTime.Now;
+            recipe.PictureUrl = await _imageStorageService.UploadFile(newRecipe.RecipePicture.OpenReadStream(),
+                newRecipe.RecipePicture.FileName, newRecipe.RecipePicture.ContentType);
 
             await _repositories.Recipe.AddAsync(recipe);
             await _repositories.Save();

@@ -19,7 +19,6 @@ public class User
     public DateTime CreatedAt { get; set; }
     
     public string? ProfilePictureUrl { get; set; }
-    public string? Favorites { get; set; }
     public string? ProfileSettings { get; set; }
     public string? DietLabels { get; set; }
     public string? HealthLabels { get; set; }

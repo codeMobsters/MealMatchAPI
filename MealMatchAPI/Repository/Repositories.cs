@@ -7,6 +7,7 @@ public class Repositories : IRepositories
 {
     private ApplicationDbContext _db;
     public IRecipeRepository Recipe { get; }
+    public IFavoriteRecipeRepository FavoriteRecipe { get; }
     public IUserRepository User { get; }
     public ICommentRepository Comment { get; }
 
@@ -16,6 +17,7 @@ public class Repositories : IRepositories
         Comment = new CommentRepository(_db);
         User = new UserRepository(_db, configuration);
         Recipe = new RecipeRepository(_db);
+        FavoriteRecipe = new FavoriteRecipeRepository(_db);
     }
     public async Task Save()
     {
