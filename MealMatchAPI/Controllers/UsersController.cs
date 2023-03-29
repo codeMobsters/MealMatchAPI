@@ -92,7 +92,7 @@ namespace MealMatchAPI.Controllers
 
         [HttpGet("recipes")]
         [Authorize]
-        public async Task<ActionResult<List<Recipe>>> GetUserRecipes()
+        public async Task<ActionResult<List<RecipeTransfer>>> GetUserRecipes()
         {
             if (_repositories.Recipe == null)
             {
@@ -104,12 +104,12 @@ namespace MealMatchAPI.Controllers
                 recipe.UserId == GetIdFromToken(token)
             );
 
-            return Ok(recipes);
+            return recipes.Select(recipe => _mapper.Map<RecipeTransfer>(recipe)).ToList();
         }
         
         [HttpGet("comments")]
         [Authorize]
-        public async Task<ActionResult<List<Comment>>> GetUserComments()
+        public async Task<ActionResult<List<CommentTransfer>>> GetUserComments()
         {
             if (_repositories.Comment == null)
             {
@@ -121,7 +121,7 @@ namespace MealMatchAPI.Controllers
                 comment.UserId == GetIdFromToken(token)
             );
 
-            return Ok(comments);
+            return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
         }
         
         [HttpPut("{id}")]
