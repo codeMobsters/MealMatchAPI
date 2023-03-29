@@ -66,14 +66,28 @@ namespace MealMatchAPI.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        public async Task<ActionResult<UserResponse>> GetUserById(int id)
         {
             if (_repositories.User == null)
             {
                 return NotFound();
             }
+            
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            
+            if (id != GetIdFromToken(token))
+            {
+                return BadRequest();
+            }
+            
+            var user = await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
 
-            return await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<UserResponse>(user);
         }
 
         [HttpGet("recipes")]

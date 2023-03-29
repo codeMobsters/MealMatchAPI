@@ -34,16 +34,11 @@ public class MapperProfile : Profile
             .ForMember(d => d.HealthLabels, opt => opt.ConvertUsing(new StringConverter()))
             .ForMember(d => d.MealType, opt => opt.ConvertUsing(new StringConverter()))
             .ForMember(d => d.Instructions, opt => opt.ConvertUsing(new StringConverter()));
-        
-        CreateMap<Recipe, NewRecipe>()
-            .ForMember(d => d.Ingredients, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.CuisineType, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.DietLabels, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.DishType, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.HealthLabels, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.MealType, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.Instructions, opt => opt.ConvertUsing(new ListConverter()));
 
+        CreateMap<User, UserResponse>()
+            .ForMember(u => u.HealthLabels, opt => opt.ConvertUsing(new ListConverter()))
+            .ForMember(u => u.ProfileSettings, opt => opt.ConvertUsing(new ListConverter()))
+            .ForMember(u => u.DietLabels, opt => opt.ConvertUsing(new ListConverter()));
         
         CreateMap<FavoriteRecipeTransfer, FavoriteRecipe>();
         CreateMap<FavoriteRecipe, FavoriteRecipeTransfer>();
