@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MealMatchAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {

@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MealMatchAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class FavoriteRecipesController : ControllerBase
     {
