@@ -25,7 +25,6 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         return await query
             .Include(recipe => recipe.Comments)
             .Include(recipe => recipe.User)
-            .AsNoTracking()
             .ToListAsync();
     }
     
@@ -39,7 +38,6 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         return await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .AsNoTracking()
             .ToListAsync();
     }
     
@@ -48,7 +46,6 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         return await _db.Recipes
             .Include(recipe => recipe.Comments)
             .Include(recipe => recipe.User)
-            .AsNoTracking()
             .FirstOrDefaultAsync(recipe => recipe.RecipeId == id);
     }
     
