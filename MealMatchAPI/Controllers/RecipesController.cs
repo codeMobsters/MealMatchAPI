@@ -89,7 +89,7 @@ namespace MealMatchAPI.Controllers
             {
                 recipe = _mapper.Map<Recipe>(newRecipe);
                 recipe.RecipeId = 0;
-                recipe.UserId = GetIdFromToken(token);
+                recipe.UserId = 1;
                 recipe.CreatedAt = DateTime.Now;
 
                 await _repositories.Recipe.AddAsync(recipe);
@@ -186,6 +186,40 @@ namespace MealMatchAPI.Controllers
 
             _repositories.Recipe.Delete(recipe);
             await _repositories.Save();
+
+            return NoContent();
+        }
+        
+        [HttpDelete("Owned/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteOwnedRecipe(int id)
+        {
+            if (_repositories.Recipe == null)
+            {
+                return NotFound();
+            }
+
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+            var recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r =>
+                r.RecipeId == id && r.UserId == GetIdFromToken(token)
+            );
+
+            if (recipe == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                recipe.UserId = 1;
+                _repositories.Recipe.Update(recipe);
+                await _repositories.Save();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
 
             return NoContent();
         }
