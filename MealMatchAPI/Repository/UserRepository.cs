@@ -70,7 +70,11 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
         {
             Id = user.UserId,
             Name = user.Name,
-            Token = tokenHandler.WriteToken(token)
+            Token = tokenHandler.WriteToken(token),
+            ProfilePictureUrl = user.ProfilePictureUrl,
+            ProfileSettings = user.ProfileSettings?.Split("<//>").ToList(),
+            DietLabels = user.DietLabels?.Split("<//>").ToList(),
+            HealthLabels = user.HealthLabels?.Split("<//>").ToList()
         };
         
         return loginResponse;
