@@ -70,7 +70,7 @@ namespace MealMatchAPI.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Recipe>> PostRecipe(RecipeTransfer newRecipe)
+        public async Task<ActionResult<RecipeTransfer>> PostRecipe(RecipeTransfer newRecipe)
         {
             if (_repositories.Recipe == null)
             {
@@ -78,16 +78,40 @@ namespace MealMatchAPI.Controllers
             }
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var isRecipeInDb = await _repositories.Recipe.Exists(r => r.PictureUrl == newRecipe.PictureUrl);
+            Recipe recipe;
+            
+            if (isRecipeInDb)
+            {
+                recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r => r.PictureUrl == newRecipe.PictureUrl);
+            }
+            else
+            {
+                recipe = _mapper.Map<Recipe>(newRecipe);
+                recipe.RecipeId = 0;
+                recipe.UserId = GetIdFromToken(token);
+                recipe.CreatedAt = DateTime.Now;
 
-            var recipe = _mapper.Map<Recipe>(newRecipe);
-            recipe.RecipeId = 0;
-            recipe.UserId = GetIdFromToken(token);
-            recipe.CreatedAt = DateTime.Now;
+                await _repositories.Recipe.AddAsync(recipe);
+                await _repositories.Save();
+            }
+            
+            var isFavoriteRecipeInDb = await _repositories.FavoriteRecipe.Exists(r =>
+                r.UserId == GetIdFromToken(token) && r.RecipeId == recipe.RecipeId
+            );
 
-            await _repositories.Recipe.AddAsync(recipe);
-            await _repositories.Save();
+            if (!isFavoriteRecipeInDb)
+            {
+                var favoriteRecipe = new FavoriteRecipe
+                {
+                    UserId = GetIdFromToken(token),
+                    RecipeId = recipe.RecipeId
+                };
+                await _repositories.FavoriteRecipe.AddAsync(favoriteRecipe);
+                await _repositories.Save();
+            }
 
-            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, _mapper.Map<RecipeTransfer>(recipe));
         }
         
         [HttpPost("New")]

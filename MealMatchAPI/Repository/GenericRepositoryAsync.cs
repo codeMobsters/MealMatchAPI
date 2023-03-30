@@ -81,4 +81,9 @@ public class GenericRepositoryAsync<T> : IGenericRepositoryAsync<T> where T : cl
     {
         DbSet.Remove(entity);
     }
+
+    public async Task<bool> Exists(Expression<Func<T, bool>> filter)
+    {
+        return await DbSet.AnyAsync(filter);
+    }
 }

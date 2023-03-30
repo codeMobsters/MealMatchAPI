@@ -12,4 +12,5 @@ public interface IGenericRepositoryAsync<T> where T : class
     Task<T> AddAsync(T entity);
     void Update(T entity);
     void Delete(T entity);
+    Task<bool> Exists(Expression<Func<T, bool>> filter);
 }
