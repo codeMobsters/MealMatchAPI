@@ -70,7 +70,6 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         return query
             .Include(recipe => recipe.Comments)
             .Include(recipe => recipe.User)
-            .AsNoTracking()
             .FirstOrDefault();
     }
 }
