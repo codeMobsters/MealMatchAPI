@@ -39,5 +39,7 @@ public class RecipeTransfer
     public int UserId { get; set; } // Author of the recipe
     [JsonPropertyName("recipeOwnerName")]
     public string? UserName { get; set; } // Author of the recipe
+    [JsonPropertyName("userProfilePictureUrl")]
+    public string? UserProfilePictureUrl { get; set; }
     public List<CommentTransfer>? Comments { get; set; }
 }
