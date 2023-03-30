@@ -94,7 +94,7 @@ namespace MealMatchAPI.Controllers
             await _repositories.Comment.AddAsync(request);
             await _repositories.Save();
         
-            return CreatedAtAction("GetCommentByCommentId", new { recipeId = request.RecipeId }, _mapper.Map<CommentTransfer>(request));
+            return CreatedAtAction("GetCommentByCommentId", new { commentId = request.CommentId }, _mapper.Map<CommentTransfer>(request));
         }
         
         [HttpPut("{commentId}")]
