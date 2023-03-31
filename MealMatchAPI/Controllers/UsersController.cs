@@ -72,14 +72,7 @@ namespace MealMatchAPI.Controllers
             {
                 return NotFound();
             }
-            
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            
-            if (id != GetIdFromToken(token))
-            {
-                return BadRequest();
-            }
-            
+
             var user = await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
 
             if (user == null)
