@@ -10,7 +10,7 @@ public class Recipe
     [Key]
     public int RecipeId { get; set; }
     [Required]
-    [MaxLength(60)]
+    [MaxLength(255)]
     public string Title { get; set; }
     public int? Like { get; set; }
     public int? Yield { get; set; }
