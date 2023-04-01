@@ -108,10 +108,7 @@ namespace MealMatchAPI.Controllers
                 return NotFound();
             }
 
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-
-
-            var recipes = await _repositories.FavoriteRecipe.GetAllAsync(recipe => recipe.UserId == GetIdFromToken(token));
+            var recipes = await _repositories.FavoriteRecipe.GetAllAsync(recipe => recipe.UserId == id);
             return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
         }
         
