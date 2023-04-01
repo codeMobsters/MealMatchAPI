@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 using MealMatchAPI.Data;
@@ -99,5 +100,17 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
         await _db.SaveChangesAsync();
 
         return user;
+    }
+    
+    public override async Task<User?> GetFirstOrDefaultAsync(Expression<Func<User, bool>> filter)
+    {
+        IQueryable<User> query = _db.Users;
+
+        query = query.Where(filter);
+
+        return await query
+            .Include(user => user.FavoriteRecipes)
+            .Include(user => user.OwnedRecipes)
+            .FirstOrDefaultAsync();
     }
 }

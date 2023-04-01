@@ -10,4 +10,9 @@ public class UserResponse
     public List<string>? ProfileSettings { get; set; }
     public List<string>? DietLabels { get; set; }
     public List<string>? HealthLabels { get; set; }
+    public int? FavoriteRecipes { get; set; }
+    public int? OwnedRecipes { get; set; }
+    
+    public int Followers { get; set; }
+    public int Following { get; set; }
 }

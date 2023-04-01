@@ -39,7 +39,9 @@ public class MapperProfile : Profile
         CreateMap<User, UserResponse>()
             .ForMember(u => u.HealthLabels, opt => opt.ConvertUsing(new ListConverter()))
             .ForMember(u => u.ProfileSettings, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(u => u.DietLabels, opt => opt.ConvertUsing(new ListConverter()));
+            .ForMember(u => u.DietLabels, opt => opt.ConvertUsing(new ListConverter()))
+            .ForMember(u => u.FavoriteRecipes, opt => opt.ConvertUsing(new FavoriteConverter()))
+            .ForMember(u => u.OwnedRecipes, opt => opt.ConvertUsing(new RecipeConverter()));
         
         CreateMap<FavoriteRecipeTransfer, FavoriteRecipe>();
         CreateMap<FavoriteRecipe, FavoriteRecipeTransfer>();
@@ -65,6 +67,20 @@ public class MapperProfile : Profile
         public List<int>? Convert(List<Like>? source, ResolutionContext context)
         {
             return source?.Select(l => l.UserId).ToList();
+        }
+    }
+    
+    private class FavoriteConverter : IValueConverter<List<FavoriteRecipe>?, int?> {
+        public int? Convert(List<FavoriteRecipe>? source, ResolutionContext context)
+        {
+            return source?.Count;
+        }
+    }
+    
+    private class RecipeConverter : IValueConverter<List<Recipe>?, int?> {
+        public int? Convert(List<Recipe>? source, ResolutionContext context)
+        {
+            return source?.Count;
         }
     }
 }

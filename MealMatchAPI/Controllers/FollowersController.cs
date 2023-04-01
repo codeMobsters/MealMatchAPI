@@ -37,12 +37,13 @@ namespace MealMatchAPI.Controllers
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
             var followingUserId = GetIdFromToken(token);
 
-            var isFollowedUserInDb = await _repositories.User.Exists(u => u.UserId == request.FollowedUserId);
+            var followedUser = await _repositories.User.GetByIdAsync(request.FollowedUserId);
+            var followingUser = await _repositories.User.GetByIdAsync(followingUserId);
             var isFollowRelationshipInDb = await _repositories.Follower.Exists(u =>
                 u.FollowingUserId == followingUserId && u.FollowedUserId == request.FollowedUserId
             );
 
-            if (!isFollowedUserInDb || isFollowRelationshipInDb || followingUserId == request.FollowedUserId)
+            if (followedUser == null || isFollowRelationshipInDb || followingUserId == request.FollowedUserId)
             {
                 return BadRequest();
             }
@@ -52,8 +53,12 @@ namespace MealMatchAPI.Controllers
                 FollowingUserId = followingUserId,
                 FollowedUserId = request.FollowedUserId
             };
+            followedUser.Followers++;
+            followingUser.Following++;
 
             await _repositories.Follower.AddAsync(follower);
+            _repositories.User.Update(followedUser);
+            _repositories.User.Update(followingUser);
             await _repositories.Save();
 
             return Ok();
@@ -71,16 +76,26 @@ namespace MealMatchAPI.Controllers
             }
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+            var followingUserId = GetIdFromToken(token);
+
+            var followedUser = await _repositories.User.GetByIdAsync(followedUserId);
+            var followingUser = await _repositories.User.GetByIdAsync(followingUserId);
 
             var follower = await _repositories.Follower.GetFirstOrDefaultAsync(u =>
                 u.FollowedUserId == followedUserId && u.FollowingUserId == GetIdFromToken(token)
             );
 
-            if (follower == null)
+            if (followedUser == null || followingUser == null || follower == null)
             {
                 return NotFound();
             }
+            
+            followedUser.Followers--;
+            followingUser.Following--;
 
+            _repositories.User.Update(followedUser);
+            _repositories.User.Update(followingUser);
+            
             _repositories.Follower.Delete(follower);
             await _repositories.Save();
 
