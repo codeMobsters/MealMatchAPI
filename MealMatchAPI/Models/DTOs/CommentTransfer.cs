@@ -7,7 +7,7 @@ public class CommentTransfer
     public DateTime CommentAt { get; set; }
     public int RecipeId { get; set; } // Recipe to be commented at
     public string UserName { get; set; }
-    public string UserProfilePictureUrl { get; set; }
+    public string? UserProfilePictureUrl { get; set; }
 
 }
 
