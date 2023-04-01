@@ -26,6 +26,7 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
             .Include(recipe => recipe.Comments)!
             .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.User)
+            .Include(recipe => recipe.Likes)
             .ToListAsync();
     }
     

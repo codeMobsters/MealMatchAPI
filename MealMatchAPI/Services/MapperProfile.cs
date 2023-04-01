@@ -24,8 +24,9 @@ public class MapperProfile : Profile
             .ForMember(d => d.DishType, opt => opt.ConvertUsing(new ListConverter()))
             .ForMember(d => d.HealthLabels, opt => opt.ConvertUsing(new ListConverter()))
             .ForMember(d => d.MealType, opt => opt.ConvertUsing(new ListConverter()))
-            .ForMember(d => d.Instructions, opt => opt.ConvertUsing(new ListConverter()));
-
+            .ForMember(d => d.Instructions, opt => opt.ConvertUsing(new ListConverter()))
+            .ForMember(d => d.Likes, opt => opt.ConvertUsing(new LikeConverter()));
+        
         CreateMap<NewRecipe, Recipe>()
             .ForMember(d => d.Ingredients, opt => opt.ConvertUsing(new StringConverter()))
             .ForMember(d => d.CuisineType, opt => opt.ConvertUsing(new StringConverter()))
@@ -57,6 +58,13 @@ public class MapperProfile : Profile
         public List<string>? Convert(string? source, ResolutionContext context)
         {
             return source?.Split("<//>").ToList();
+        }
+    }
+    
+    private class LikeConverter : IValueConverter<List<Like>?, List<int>?> {
+        public List<int>? Convert(List<Like>? source, ResolutionContext context)
+        {
+            return source?.Select(l => l.UserId).ToList();
         }
     }
 }

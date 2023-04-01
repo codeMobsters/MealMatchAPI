@@ -24,4 +24,5 @@ public class User
     public string? DietLabels { get; set; }
     public string? HealthLabels { get; set; }
     public List<FavoriteRecipe> FavoriteRecipes { get; set; }
+    public List<Like> LikedRecipes { get; set; }
 }

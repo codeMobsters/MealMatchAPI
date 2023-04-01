@@ -39,5 +39,7 @@ public class Recipe
     public virtual User User { get; set; }
     [ValidateNever]
     public List<Comment>? Comments { get; set; }
+    
+    public List<Like>? Likes { get; set; }
 }
 

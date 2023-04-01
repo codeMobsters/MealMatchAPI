@@ -26,6 +26,7 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
             .Include(recipe => recipe.Recipe)
             .Include(recipe => recipe.Recipe.Comments)!
             .ThenInclude(comment => comment.User)
+            .Include(recipe => recipe.Recipe.Likes)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .AsNoTracking()

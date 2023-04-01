@@ -42,4 +42,5 @@ public class RecipeTransfer
     [JsonPropertyName("userProfilePictureUrl")]
     public string? UserProfilePictureUrl { get; set; }
     public List<CommentTransfer>? Comments { get; set; }
+    public List<int>? Likes { get; set; }
 }

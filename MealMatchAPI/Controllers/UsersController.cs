@@ -190,12 +190,16 @@ namespace MealMatchAPI.Controllers
         
             return NoContent();
         }
-        
+
         private int GetIdFromToken(string token)
         {
             var jwtSecurityToken = new JwtSecurityToken(jwtEncodedString: token);
             string id = jwtSecurityToken.Claims.First(c => c.Type == "unique_name").Value;
             return Int32.Parse(id);
         }
+        
+        
+        
+        // Likes
     }
 }
