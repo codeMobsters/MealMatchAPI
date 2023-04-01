@@ -83,21 +83,36 @@ namespace MealMatchAPI.Controllers
             return _mapper.Map<UserResponse>(user);
         }
 
-        [HttpGet("recipes")]
+        [HttpGet("{id}/Recipes")]
         [Authorize]
-        public async Task<ActionResult<List<RecipeTransfer>>> GetUserRecipes()
+        public async Task<ActionResult<List<RecipeTransfer>>> GetUserRecipesFromId(int id)
         {
             if (_repositories.Recipe == null)
             {
                 return NotFound();
             }
-            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
             
             var recipes = await _repositories.Recipe.GetAllAsync(recipe => 
-                recipe.UserId == GetIdFromToken(token)
+                recipe.UserId == id
             );
 
             return recipes.Select(recipe => _mapper.Map<RecipeTransfer>(recipe)).ToList();
+        }
+        
+        [HttpGet("{id}/FavoriteRecipes")]
+        [Authorize]
+        public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetUserFavoriteRecipesFromId(int id)
+        {
+            if (_repositories.Recipe == null)
+            {
+                return NotFound();
+            }
+
+            var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+
+
+            var recipes = await _repositories.FavoriteRecipe.GetAllAsync(recipe => recipe.UserId == GetIdFromToken(token));
+            return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
         }
         
         [HttpGet("comments")]
