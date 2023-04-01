@@ -23,7 +23,8 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
             query = _db.Recipes.Where(filter);
         }
         return await query
-            .Include(recipe => recipe.Comments)
+            .Include(recipe => recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.User)
             .ToListAsync();
     }
@@ -44,7 +45,8 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
     public override async Task<Recipe?> GetByIdAsync(int id)
     {
         return await _db.Recipes
-            .Include(recipe => recipe.Comments)
+            .Include(recipe => recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.User)
             .FirstOrDefaultAsync(recipe => recipe.RecipeId == id);
     }
@@ -56,7 +58,8 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         query = query.Where(filter);
 
         return await query
-            .Include(recipe => recipe.Comments)
+            .Include(recipe => recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.User)
             .FirstOrDefaultAsync();
     }
@@ -68,7 +71,8 @@ public class RecipeRepository : GenericRepositoryAsync<Recipe>, IRecipeRepositor
         query = query.Where(filter);
 
         return query
-            .Include(recipe => recipe.Comments)
+            .Include(recipe => recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.User)
             .FirstOrDefault();
     }

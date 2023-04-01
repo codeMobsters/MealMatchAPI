@@ -24,7 +24,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
         }
         return await query
             .Include(recipe => recipe.Recipe)
-            .Include(recipe => recipe.Recipe.Comments)
+            .Include(recipe => recipe.Recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .AsNoTracking()
@@ -42,7 +43,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Include(recipe => recipe.Recipe)
-            .Include(recipe => recipe.Recipe.Comments)
+            .Include(recipe => recipe.Recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .AsNoTracking()
@@ -53,7 +55,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
     {
         return await _db.FavoriteRecipes
             .Include(recipe => recipe.Recipe)
-            .Include(recipe => recipe.Recipe.Comments)
+            .Include(recipe => recipe.Recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .AsNoTracking()
@@ -68,7 +71,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
 
         return await query
             .Include(recipe => recipe.Recipe)
-            .Include(recipe => recipe.Recipe.Comments)
+            .Include(recipe => recipe.Recipe.Comments)!
+            .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .AsNoTracking()
