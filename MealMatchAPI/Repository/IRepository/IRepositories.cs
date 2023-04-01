@@ -7,5 +7,6 @@ public interface IRepositories
     IUserRepository User { get; }
     ICommentRepository Comment { get; }
     ILikeRepository Like { get; }
+    IFollowerRepository Follower { get; }
     Task Save();
 }

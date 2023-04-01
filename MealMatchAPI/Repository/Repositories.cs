@@ -11,6 +11,7 @@ public class Repositories : IRepositories
     public IUserRepository User { get; }
     public ICommentRepository Comment { get; }
     public ILikeRepository Like { get; }
+    public IFollowerRepository Follower { get; }
 
     public Repositories(ApplicationDbContext db, IConfiguration configuration)
     {
@@ -20,6 +21,7 @@ public class Repositories : IRepositories
         Recipe = new RecipeRepository(_db);
         FavoriteRecipe = new FavoriteRecipeRepository(_db);
         Like = new LikeRepository(_db);
+        Follower = new FollowerRepository(_db);
     }
     public async Task Save()
     {
