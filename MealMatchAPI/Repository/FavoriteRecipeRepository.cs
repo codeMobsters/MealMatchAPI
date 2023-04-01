@@ -70,11 +70,6 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
         query = query.Where(filter);
 
         return await query
-            .Include(recipe => recipe.Recipe)
-            .Include(recipe => recipe.Recipe.Comments)!
-            .ThenInclude(comment => comment.User)
-            .Include(recipe => recipe.Recipe.User)
-            .Include(recipe => recipe.User)
             .AsNoTracking()
             .FirstOrDefaultAsync();
     }
