@@ -30,7 +30,7 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
     public async Task<LoginResponse> Login(LoginRequest loginRequest)
     {
         var passwordHasher = new PasswordHasher<User>();
-        var user = await _db.Users.FirstOrDefaultAsync(user => user.Username.ToLower() == loginRequest.Username.ToLower());
+        var user = await _db.Users.Include(user => user.FavoriteRecipes).FirstOrDefaultAsync(user => user.Username.ToLower() == loginRequest.Username.ToLower());
         if (user == null)
         {
             return new LoginResponse()
@@ -74,7 +74,8 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
             ProfilePictureUrl = user.ProfilePictureUrl,
             ProfileSettings = user.ProfileSettings?.Split("<//>").ToList(),
             DietLabels = user.DietLabels?.Split("<//>").ToList(),
-            HealthLabels = user.HealthLabels?.Split("<//>").ToList()
+            HealthLabels = user.HealthLabels?.Split("<//>").ToList(),
+            FavoriteRecipes = user.FavoriteRecipes.Select(r => r.RecipeId).ToList()
         };
         
         return loginResponse;

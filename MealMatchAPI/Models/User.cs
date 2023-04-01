@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace MealMatchAPI.Models;
 
@@ -22,4 +23,5 @@ public class User
     public string? ProfileSettings { get; set; }
     public string? DietLabels { get; set; }
     public string? HealthLabels { get; set; }
+    public List<FavoriteRecipe> FavoriteRecipes { get; set; }
 }
