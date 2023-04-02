@@ -12,4 +12,5 @@ public class LoginResponse
     
     public List<int>? FavoriteRecipes { get; set; }
     public List<int>? LikedRecipes { get; set; }
+    public List<int>? FollowedUserIds { get; set; }
 }

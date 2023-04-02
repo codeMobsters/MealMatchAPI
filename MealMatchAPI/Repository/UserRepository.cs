@@ -78,8 +78,10 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
             ProfileSettings = user.ProfileSettings?.Split("<//>").ToList(),
             DietLabels = user.DietLabels?.Split("<//>").ToList(),
             HealthLabels = user.HealthLabels?.Split("<//>").ToList(),
-            FavoriteRecipes = user.FavoriteRecipes.Select(r => r.RecipeId).ToList(),
-            LikedRecipes = user.LikedRecipes.Select(r => r.RecipeId).ToList()
+            FavoriteRecipes = user.FavoriteRecipes?.Select(r => r.RecipeId).ToList(),
+            LikedRecipes = user.LikedRecipes?.Select(r => r.RecipeId).ToList(),
+            FollowedUserIds = _db.Followers.Where(follower => follower.FollowingUserId == user.UserId)
+                .Select(u => u.FollowedUserId).ToList()
         };
         
         return loginResponse;
