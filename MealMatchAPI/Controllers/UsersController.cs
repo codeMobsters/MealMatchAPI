@@ -61,22 +61,12 @@ namespace MealMatchAPI.Controllers
                 return NotFound();
             }
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            
-            var requestingUser = await _repositories.User
-                .GetFirstOrDefaultAsync(c => c.UserId == GetIdFromToken(token));
 
-            if (requestingUser == null)
-            {
-                return NotFound();
-            }
-            
-            var users = await _repositories.User.GetAllAsync();
+            var users = await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token));
             
             return users
-                .Where(user => user != requestingUser)
                 .Select(user => _mapper.Map<UserResponse>(user))
                 .ToList();
-            
         }
 
         [HttpGet("{id}")]
@@ -125,6 +115,40 @@ namespace MealMatchAPI.Controllers
 
             var recipes = await _repositories.FavoriteRecipe.GetAllAsync(recipe => recipe.UserId == id);
             return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
+        }
+        
+        // Find people who are following this user
+        [HttpGet("{id}/Followers")]
+        [Authorize]
+        public async Task<ActionResult<List<UserResponse>>> GetFollowersFromUserId(int id)
+        {
+            if (_repositories.Follower == null)
+            {
+                return NotFound();
+            }
+
+            var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id);
+            
+            return users
+                .Select(user => _mapper.Map<UserResponse>(user.FollowingUser))
+                .ToList();
+        }
+        
+        // Find people who this user is following
+        [HttpGet("{id}/Following")]
+        [Authorize]
+        public async Task<ActionResult<List<UserResponse>>> GetFollowingFromUserId(int id)
+        {
+            if (_repositories.Follower == null)
+            {
+                return NotFound();
+            }
+
+            var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id);
+            
+            return users
+                .Select(user => _mapper.Map<UserResponse>(user.FollowedUser))
+                .ToList();
         }
         
         [HttpGet("comments")]

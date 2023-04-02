@@ -14,4 +14,18 @@ public class FollowerRepository : GenericRepositoryAsync<Follower>, IFollowerRep
     {
         _db = db;
     }
+    
+    public override async Task<List<Follower>> GetAllAsync(Expression<Func<Follower, bool>>? filter = null)
+    {
+        IQueryable<Follower> query = _db.Followers;
+        if (filter != null)
+        {
+            query = _db.Followers.Where(filter);
+        }
+        return await query
+            .Include(user => user.FollowingUser)
+            .Include(user => user.FollowedUser)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
