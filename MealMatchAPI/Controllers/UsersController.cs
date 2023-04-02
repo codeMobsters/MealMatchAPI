@@ -129,10 +129,10 @@ namespace MealMatchAPI.Controllers
             return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
         }
         
-        [HttpPut("{id}")]
+        [HttpPut("{id}/Update")]
         [Authorize]
         [Consumes("multipart/form-data")] 
-        public async Task<IActionResult> PutUser(int id, [FromForm] UserUpdateRequest updatedUser)
+        public async Task<ActionResult<string>> PutUser(int id, [FromForm] UserUpdateRequest updatedUser)
         {
             if (_repositories.User == null)
             {
@@ -188,7 +188,7 @@ namespace MealMatchAPI.Controllers
                 return NotFound();
             }
         
-            return NoContent();
+            return Ok(user.ProfilePictureUrl);
         }
 
         private int GetIdFromToken(string token)

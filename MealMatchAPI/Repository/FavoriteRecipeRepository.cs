@@ -74,4 +74,21 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
             .AsNoTracking()
             .FirstOrDefaultAsync();
     }
+
+    public async Task<List<FavoriteRecipe>> GetAllRecipesFromFollowingAsync(int userId)
+    {
+        var following = _db.Followers.Where(follower => follower.FollowingUserId == userId)
+            .Select(follower => follower.FollowedUserId).ToList();
+        
+        return await _db.FavoriteRecipes.Where(recipe => following.Contains(recipe.UserId))
+            .Include(recipe => recipe.Recipe)
+            .Include(recipe => recipe.Recipe.Comments)!
+            .ThenInclude(comment => comment.User)
+            .Include(recipe => recipe.Recipe.Likes)
+            .Include(recipe => recipe.Recipe.User)
+            .Include(recipe => recipe.User)
+            .OrderByDescending(recipe => recipe.FavoriteRecipeId)
+            .AsNoTracking()
+            .ToListAsync();
+    }
 }
