@@ -8,6 +8,7 @@ using MealMatchAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MealMatchAPI.Controllers
 {
@@ -30,13 +31,15 @@ namespace MealMatchAPI.Controllers
         public async Task<ActionResult<LoginResponse>> Login([FromBody] LoginRequest loginRequest)
         {
             var loginResponse = await _repositories.User.Login(loginRequest);
-            if (loginResponse.Id == 0 || string.IsNullOrEmpty(loginResponse.Name) || string.IsNullOrEmpty(loginResponse.Token))
+            if (loginResponse.Id == 0 || string.IsNullOrEmpty(loginResponse.Name) ||
+                string.IsNullOrEmpty(loginResponse.Token))
             {
                 return BadRequest(new { message = "Username or password is incorrect" });
             }
+
             return loginResponse;
         }
-        
+
         [HttpPost("Authentication/register")]
         public async Task<IActionResult> Register([FromBody] RegistrationRequest registrationRequest)
         {
@@ -44,30 +47,53 @@ namespace MealMatchAPI.Controllers
             {
                 return BadRequest(new { message = "Please choose a new Username" });
             }
+
             var user = await _repositories.User.Register(registrationRequest);
             if (user == null)
             {
                 return BadRequest(new { message = "Error while registering" });
             }
+
             return Ok();
         }
-        
+
         [HttpGet]
         [Authorize]
-        public async Task<ActionResult<List<UserResponse>>> GetUsers()
+        public async Task<ActionResult<List<UserResponse>>> GetUsers([FromQuery] string? q)
         {
             if (_repositories.User == null)
             {
                 return NotFound();
             }
+
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            var users = await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token));
-            
+
+            var users = q.IsNullOrEmpty()
+                ? await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token))
+                : await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token) && u.Name.Contains(q));
+
             return users
                 .Select(user => _mapper.Map<UserResponse>(user))
                 .ToList();
         }
+
+        // [HttpGet]
+        // [Authorize]
+        // public async Task<ActionResult<List<UserResponse>>> GetUsersBySearch([FromQuery] string q)
+        // {
+        //     if (_repositories.User == null)
+        //     {
+        //         return NotFound();
+        //     }
+        //     var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+        //
+        //     var users = await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token));
+        //     
+        //     return users
+        //         .Select(user => _mapper.Map<UserResponse>(user))
+        //         .ToList();
+        // }
 
         [HttpGet("{id}")]
         [Authorize]
@@ -96,14 +122,14 @@ namespace MealMatchAPI.Controllers
             {
                 return NotFound();
             }
-            
-            var recipes = await _repositories.Recipe.GetAllAsync(recipe => 
+
+            var recipes = await _repositories.Recipe.GetAllAsync(recipe =>
                 recipe.UserId == id
             );
 
             return recipes.Select(recipe => _mapper.Map<RecipeTransfer>(recipe)).ToList();
         }
-        
+
         [HttpGet("{id}/FavoriteRecipes")]
         [Authorize]
         public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetUserFavoriteRecipesFromId(int id)
@@ -116,7 +142,7 @@ namespace MealMatchAPI.Controllers
             var recipes = await _repositories.FavoriteRecipe.GetAllAsync(recipe => recipe.UserId == id);
             return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
         }
-        
+
         // Find people who are following this user
         [HttpGet("{id}/Followers")]
         [Authorize]
@@ -128,12 +154,12 @@ namespace MealMatchAPI.Controllers
             }
 
             var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id);
-            
+
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowingUser))
                 .ToList();
         }
-        
+
         // Find people who this user is following
         [HttpGet("{id}/Following")]
         [Authorize]
@@ -145,12 +171,12 @@ namespace MealMatchAPI.Controllers
             }
 
             var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id);
-            
+
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowedUser))
                 .ToList();
         }
-        
+
         [HttpGet("comments")]
         [Authorize]
         public async Task<ActionResult<List<CommentTransfer>>> GetUserComments()
@@ -159,39 +185,40 @@ namespace MealMatchAPI.Controllers
             {
                 return NotFound();
             }
+
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            
-            var comments = await _repositories.Comment.GetAllAsync(comment => 
+
+            var comments = await _repositories.Comment.GetAllAsync(comment =>
                 comment.UserId == GetIdFromToken(token)
             );
 
             return comments.Select(comment => _mapper.Map<CommentTransfer>(comment)).ToList();
         }
-        
+
         [HttpPut("{id}/Update")]
         [Authorize]
-        [Consumes("multipart/form-data")] 
+        [Consumes("multipart/form-data")]
         public async Task<ActionResult<string>> PutUser(int id, [FromForm] UserUpdateRequest updatedUser)
         {
             if (_repositories.User == null)
             {
                 return NotFound();
             }
-            
+
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            
+
             if (id != GetIdFromToken(token))
             {
                 return BadRequest();
             }
 
-            var user =  await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
-            
+            var user = await _repositories.User.GetFirstOrDefaultAsync(c => c.UserId == id);
+
             if (user == null)
             {
                 return NotFound();
             }
-            
+
             user.Name = updatedUser.Name ?? user.Name;
 
             if (updatedUser.ProfilePicture != null)
@@ -200,23 +227,24 @@ namespace MealMatchAPI.Controllers
                 {
                     await _imageStorageService.DeleteFile(user.ProfilePictureUrl);
                 }
-                
-                user.ProfilePictureUrl = await _imageStorageService.UploadFile(updatedUser.ProfilePicture.OpenReadStream(),
+
+                user.ProfilePictureUrl = await _imageStorageService.UploadFile(
+                    updatedUser.ProfilePicture.OpenReadStream(),
                     updatedUser.ProfilePicture.FileName, updatedUser.ProfilePicture.ContentType);
             }
 
             user.ProfileSettings = updatedUser.ProfileSettings == null
                 ? user.ProfileSettings
                 : String.Join("<//>", updatedUser.ProfileSettings);
-            
+
             user.HealthLabels = updatedUser.HealthLabels == null
                 ? user.HealthLabels
                 : String.Join("<//>", updatedUser.HealthLabels);
-            
+
             user.DietLabels = updatedUser.DietLabels == null
                 ? user.DietLabels
                 : String.Join("<//>", updatedUser.DietLabels);
-        
+
             try
             {
                 _repositories.User.Update(user);
@@ -226,7 +254,7 @@ namespace MealMatchAPI.Controllers
             {
                 return NotFound();
             }
-        
+
             return Ok(user.ProfilePictureUrl);
         }
 
@@ -236,9 +264,8 @@ namespace MealMatchAPI.Controllers
             string id = jwtSecurityToken.Claims.First(c => c.Type == "unique_name").Value;
             return Int32.Parse(id);
         }
-        
-        
-        
+
+
         // Likes
     }
 }
