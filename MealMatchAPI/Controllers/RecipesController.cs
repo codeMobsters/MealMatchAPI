@@ -255,7 +255,14 @@ namespace MealMatchAPI.Controllers
                 MealType = mealType
             };
 
-            return await _edamamApiService.GetQueriedRecipesFromApi(recipeQuery);
+            try
+            {
+                return await _edamamApiService.GetQueriedRecipesFromApi(recipeQuery);
+            }
+            catch (Exception e)
+            {
+                return  NotFound();
+            }
         }
 
         [HttpGet("Edamam/Next")]
