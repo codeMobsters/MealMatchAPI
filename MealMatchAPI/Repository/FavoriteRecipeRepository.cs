@@ -79,9 +79,25 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
     {
         var following = _db.Followers.Where(follower => follower.FollowingUserId == userId)
             .Select(follower => follower.FollowedUserId).ToList();
+
+        var user = _db.Users.Find(userId);
+        var healthLabels = user?.HealthLabels?.Split("<//>").ToList();
+        var dietLabels = user?.DietLabels?.Split("<//>").ToList();
         
-        return await _db.FavoriteRecipes.Where(recipe => following.Contains(recipe.UserId))
-            .Include(recipe => recipe.Recipe)
+        IQueryable<FavoriteRecipe> query = _db.FavoriteRecipes.Where(recipe => following.Contains(recipe.UserId))
+            .Include(recipe => recipe.Recipe);
+
+        if (healthLabels?.Count > 0)
+        {
+            healthLabels.ForEach(label => query = query.Where(recipe => recipe.Recipe.HealthLabels != null && recipe.Recipe.HealthLabels.Contains(label)));
+        }
+        
+        if (dietLabels?.Count > 0)
+        {
+            dietLabels.ForEach(label => query = query.Where(recipe => recipe.Recipe.DietLabels != null && recipe.Recipe.DietLabels.Contains(label)));
+        }
+        
+        return await query
             .Include(recipe => recipe.Recipe.Comments)!
             .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.Likes)

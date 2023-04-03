@@ -52,7 +52,6 @@ namespace MealMatchAPI.Controllers
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-
             var recipes = await _repositories.FavoriteRecipe.GetAllRecipesFromFollowingAsync(GetIdFromToken(token));
             return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
         }

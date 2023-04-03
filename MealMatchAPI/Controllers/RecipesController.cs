@@ -78,12 +78,12 @@ namespace MealMatchAPI.Controllers
             }
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            var isRecipeInDb = await _repositories.Recipe.Exists(r => r.PictureUrl == newRecipe.PictureUrl);
+            var isRecipeInDb = await _repositories.Recipe.Exists(r => r.SourceUrl == newRecipe.SourceUrl);
             Recipe recipe;
             
             if (isRecipeInDb)
             {
-                recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r => r.PictureUrl == newRecipe.PictureUrl);
+                recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r => r.SourceUrl == newRecipe.SourceUrl);
             }
             else
             {
@@ -91,6 +91,7 @@ namespace MealMatchAPI.Controllers
                 recipe.RecipeId = 0;
                 recipe.UserId = 1;
                 recipe.CreatedAt = DateTime.Now;
+                recipe.PictureUrl = await _imageStorageService.UploadFileFromEdamam(recipe.PictureUrl);
 
                 await _repositories.Recipe.AddAsync(recipe);
                 await _repositories.Save();

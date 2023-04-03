@@ -1,5 +1,7 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Azure;
+using HttpClient = System.Net.Http.HttpClient;
 
 namespace MealMatchAPI.Services;
 
@@ -12,11 +14,17 @@ public class ImageStorageService : IImageStorageService
         _configuration = configuration;
     }
 
+    public async Task<string> UploadFileFromEdamam(string url)
+    {
+        var client = new HttpClient();
+        var stream = await client.GetStreamAsync(url);
+        return await UploadFile(stream, Guid.NewGuid().ToString(), "image/jpeg");
+    }
+
     public async Task<string> UploadFile(Stream fileStream, string fileName, string contentType)
     {
         // Retrieve the connection string for use with the application. 
         string connectionString = _configuration.GetConnectionString("AZURE_STORAGE_CONNECTION_STRING");
-        
 
         // Create a BlobServiceClient object 
         var blobServiceClient = new BlobServiceClient(connectionString);
