@@ -3,6 +3,7 @@ using MealMatchAPI.Data;
 using MealMatchAPI.Models;
 using MealMatchAPI.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MealMatchAPI.Repository;
 
@@ -87,12 +88,12 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
         IQueryable<FavoriteRecipe> query = _db.FavoriteRecipes.Where(recipe => following.Contains(recipe.UserId))
             .Include(recipe => recipe.Recipe);
 
-        if (healthLabels?.Count > 0)
+        if (healthLabels?.Count > 0 && !string.IsNullOrEmpty(healthLabels[0]))
         {
             healthLabels.ForEach(label => query = query.Where(recipe => recipe.Recipe.HealthLabels != null && recipe.Recipe.HealthLabels.Contains(label)));
         }
         
-        if (dietLabels?.Count > 0)
+        if (dietLabels?.Count > 0  && !string.IsNullOrEmpty(dietLabels[0]))
         {
             dietLabels.ForEach(label => query = query.Where(recipe => recipe.Recipe.DietLabels != null && recipe.Recipe.DietLabels.Contains(label)));
         }
