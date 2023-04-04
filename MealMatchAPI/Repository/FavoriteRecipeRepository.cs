@@ -82,8 +82,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
             .Select(follower => follower.FollowedUserId).ToList();
 
         var user = _db.Users.Find(userId);
-        var healthLabels = string.IsNullOrEmpty(user?.HealthLabels) ? user?.HealthLabels?.Split("<//>").ToList() : null;
-        var dietLabels = string.IsNullOrEmpty(user?.DietLabels) ?user?.DietLabels?.Split("<//>").ToList() : null;
+        var healthLabels = !string.IsNullOrEmpty(user?.HealthLabels) ? user?.HealthLabels?.Split("<//>").ToList() : null;
+        var dietLabels = !string.IsNullOrEmpty(user?.DietLabels) ? user?.DietLabels?.Split("<//>").ToList() : null;
         
         IQueryable<FavoriteRecipe> query = _db.FavoriteRecipes.Where(recipe => following.Contains(recipe.UserId))
             .Include(recipe => recipe.Recipe);
