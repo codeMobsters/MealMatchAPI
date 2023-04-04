@@ -76,8 +76,8 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
             Token = tokenHandler.WriteToken(token),
             ProfilePictureUrl = user.ProfilePictureUrl,
             ProfileSettings = user.ProfileSettings?.Split("<//>").ToList(),
-            DietLabels = user.DietLabels?.Split("<//>").ToList(),
-            HealthLabels = user.HealthLabels?.Split("<//>").ToList(),
+            DietLabels = string.IsNullOrEmpty(user.DietLabels) ? user.DietLabels?.Split("<//>").ToList() : null,
+            HealthLabels = string.IsNullOrEmpty(user.HealthLabels) ? user.HealthLabels?.Split("<//>").ToList() : null,
             FavoriteRecipes = user.FavoriteRecipes?.Select(r => r.RecipeId).ToList(),
             LikedRecipes = user.LikedRecipes?.Select(r => r.RecipeId).ToList(),
             FollowedUserIds = _db.Followers.Where(follower => follower.FollowingUserId == user.UserId)
