@@ -217,7 +217,7 @@ namespace MealMatchAPI.Controllers
 
                 user.ProfilePictureUrl = await _imageStorageService.UploadFile(
                     updatedUser.ProfilePicture.OpenReadStream(),
-                    updatedUser.ProfilePicture.FileName, updatedUser.ProfilePicture.ContentType);
+                    Guid.NewGuid().ToString(), updatedUser.ProfilePicture.ContentType);
             }
 
             user.ProfileSettings = updatedUser.ProfileSettings == null
