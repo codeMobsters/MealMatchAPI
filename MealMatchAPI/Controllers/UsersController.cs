@@ -138,7 +138,7 @@ namespace MealMatchAPI.Controllers
             
             var users = q.IsNullOrEmpty()
                 ? await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id)
-                : await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id && follower.FollowedUser.Name.Contains(q));
+                : await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id && follower.FollowingUser.Name.Contains(q));
 
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowingUser))
@@ -157,7 +157,7 @@ namespace MealMatchAPI.Controllers
             
             var users = q.IsNullOrEmpty()
                 ? await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id)
-                : await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id && follower.FollowingUser.Name.Contains(q));
+                : await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id && follower.FollowedUser.Name.Contains(q));
 
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowedUser))
