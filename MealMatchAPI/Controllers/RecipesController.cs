@@ -136,8 +136,16 @@ namespace MealMatchAPI.Controllers
 
             await _repositories.Recipe.AddAsync(recipe);
             await _repositories.Save();
+            
+            var favoriteRecipe = new FavoriteRecipe
+            {
+                UserId = GetIdFromToken(token),
+                RecipeId = recipe.RecipeId
+            };
+            await _repositories.FavoriteRecipe.AddAsync(favoriteRecipe);
+            await _repositories.Save();
 
-            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, recipe);
+            return CreatedAtAction("GetRecipe", new { id = recipe.RecipeId }, _mapper.Map<RecipeTransfer>(recipe));
         }
 
         [HttpPut("{id}")]
