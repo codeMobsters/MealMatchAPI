@@ -76,14 +76,14 @@ namespace MealMatchAPI.Controllers
             {
                 return Problem("Entity set 'RecipeContext.Recipe'  is null.");
             }
-
+            // Not sure r.RecipeId == newRecipe.RecipeId is needed
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-            var isRecipeInDb = await _repositories.Recipe.Exists(r => r.SourceUrl == newRecipe.SourceUrl);
+            var isRecipeInDb = await _repositories.Recipe.Exists(r => r.SourceUrl == newRecipe.SourceUrl || r.RecipeId == newRecipe.RecipeId);
             Recipe recipe;
             
             if (isRecipeInDb)
             {
-                recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r => r.SourceUrl == newRecipe.SourceUrl);
+                recipe = await _repositories.Recipe.GetFirstOrDefaultAsync(r => r.SourceUrl == newRecipe.SourceUrl || r.RecipeId == newRecipe.RecipeId);
             }
             else
             {
