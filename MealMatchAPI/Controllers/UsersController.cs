@@ -78,23 +78,6 @@ namespace MealMatchAPI.Controllers
                 .ToList();
         }
 
-        // [HttpGet]
-        // [Authorize]
-        // public async Task<ActionResult<List<UserResponse>>> GetUsersBySearch([FromQuery] string q)
-        // {
-        //     if (_repositories.User == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-        //
-        //     var users = await _repositories.User.GetAllAsync(u => u.UserId != GetIdFromToken(token));
-        //     
-        //     return users
-        //         .Select(user => _mapper.Map<UserResponse>(user))
-        //         .ToList();
-        // }
-
         [HttpGet("{id}")]
         [Authorize]
         public async Task<ActionResult<UserResponse>> GetUserById(int id)
@@ -146,14 +129,16 @@ namespace MealMatchAPI.Controllers
         // Find people who are following this user
         [HttpGet("{id}/Followers")]
         [Authorize]
-        public async Task<ActionResult<List<UserResponse>>> GetFollowersFromUserId(int id)
+        public async Task<ActionResult<List<UserResponse>>> GetFollowersFromUserId(int id, [FromQuery] string? q)
         {
             if (_repositories.Follower == null)
             {
                 return NotFound();
             }
-
-            var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id);
+            
+            var users = q.IsNullOrEmpty()
+                ? await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id)
+                : await _repositories.Follower.GetAllAsync(follower => follower.FollowedUserId == id && follower.FollowedUser.Name.Contains(q));
 
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowingUser))
@@ -163,14 +148,16 @@ namespace MealMatchAPI.Controllers
         // Find people who this user is following
         [HttpGet("{id}/Following")]
         [Authorize]
-        public async Task<ActionResult<List<UserResponse>>> GetFollowingFromUserId(int id)
+        public async Task<ActionResult<List<UserResponse>>> GetFollowingFromUserId(int id, [FromQuery] string? q)
         {
             if (_repositories.Follower == null)
             {
                 return NotFound();
             }
-
-            var users = await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id);
+            
+            var users = q.IsNullOrEmpty()
+                ? await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id)
+                : await _repositories.Follower.GetAllAsync(follower => follower.FollowingUserId == id && follower.FollowingUser.Name.Contains(q));
 
             return users
                 .Select(user => _mapper.Map<UserResponse>(user.FollowedUser))
