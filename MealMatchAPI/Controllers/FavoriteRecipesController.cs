@@ -43,7 +43,7 @@ namespace MealMatchAPI.Controllers
         
         [HttpGet("Followers")]
         [Authorize]
-        public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetRecipesFromFollowing([FromQuery] int page)
+        public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetRecipesFromFollowing([FromQuery] int page = 1)
         {
             if (_repositories.Recipe == null)
             {
