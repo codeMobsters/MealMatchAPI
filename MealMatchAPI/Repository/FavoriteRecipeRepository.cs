@@ -101,14 +101,14 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
         }
         
         return await query
-            .Skip((pageNumber - 1) * 20)
-            .Take(20)
             .Include(recipe => recipe.Recipe.Comments)!
             .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.Likes)
             .Include(recipe => recipe.Recipe.User)
             .Include(recipe => recipe.User)
             .OrderByDescending(recipe => recipe.FavoriteRecipeId)
+            .Skip((pageNumber - 1) * 20)
+            .Take(20)
             .AsNoTracking()
             .ToListAsync();
     }
