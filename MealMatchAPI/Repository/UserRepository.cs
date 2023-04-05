@@ -31,7 +31,8 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
     public async Task<LoginResponse> Login(LoginRequest loginRequest)
     {
         var passwordHasher = new PasswordHasher<User>();
-        var user = await _db.Users.Include(user => user.FavoriteRecipes)
+        var user = await _db.Users.Include(user => user.FavoriteRecipes)!
+            .ThenInclude(recipe => recipe.Recipe)
             .Include(user => user.LikedRecipes)
             .FirstOrDefaultAsync(user => user.Username.ToLower() == loginRequest.Username.ToLower());
         if (user == null)
@@ -79,6 +80,7 @@ public class UserRepository : GenericRepositoryAsync<User>, IUserRepository
             DietLabels = !string.IsNullOrEmpty(user.DietLabels) ? user.DietLabels?.Split("<//>").ToList() : null,
             HealthLabels = !string.IsNullOrEmpty(user.HealthLabels) ? user.HealthLabels?.Split("<//>").ToList() : null,
             FavoriteRecipes = user.FavoriteRecipes?.Select(r => r.RecipeId).ToList(),
+            FavoriteRecipesSources = user.FavoriteRecipes?.Select(r => r.Recipe.SourceUrl).ToList(),
             LikedRecipes = user.LikedRecipes?.Select(r => r.RecipeId).ToList(),
             FollowedUserIds = _db.Followers.Where(follower => follower.FollowingUserId == user.UserId)
                 .Select(u => u.FollowedUserId).ToList()

@@ -5,5 +5,5 @@ namespace MealMatchAPI.Repository.IRepository;
 
 public interface IFavoriteRecipeRepository : IGenericRepositoryAsync<FavoriteRecipe>
 {
-    Task<List<FavoriteRecipe>> GetAllRecipesFromFollowingAsync(int userId);
+    Task<List<FavoriteRecipe>> GetAllRecipesFromFollowingAsync(int userId, int pageNumber);
 }

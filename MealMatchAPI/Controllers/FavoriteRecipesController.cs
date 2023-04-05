@@ -43,7 +43,7 @@ namespace MealMatchAPI.Controllers
         
         [HttpGet("Followers")]
         [Authorize]
-        public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetRecipesFromFollowing()
+        public async Task<ActionResult<List<FavoriteRecipeTransfer>>> GetRecipesFromFollowing([FromQuery] int page)
         {
             if (_repositories.Recipe == null)
             {
@@ -52,7 +52,7 @@ namespace MealMatchAPI.Controllers
 
             var token = Request.Headers.Authorization.ToString().Replace("Bearer ", "");
 
-            var recipes = await _repositories.FavoriteRecipe.GetAllRecipesFromFollowingAsync(GetIdFromToken(token));
+            var recipes = await _repositories.FavoriteRecipe.GetAllRecipesFromFollowingAsync(GetIdFromToken(token), page);
             return recipes.Select(recipe => _mapper.Map<FavoriteRecipeTransfer>(recipe)).ToList();
         }
 

@@ -76,7 +76,7 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<FavoriteRecipe>> GetAllRecipesFromFollowingAsync(int userId)
+    public async Task<List<FavoriteRecipe>> GetAllRecipesFromFollowingAsync(int userId, int pageNumber = 1)
     {
         var following = _db.Followers.Where(follower => follower.FollowingUserId == userId)
             .Select(follower => follower.FollowedUserId).ToList();
@@ -101,6 +101,8 @@ public class FavoriteRecipeRepository : GenericRepositoryAsync<FavoriteRecipe>, 
         }
         
         return await query
+            .Skip((pageNumber - 1) * 20)
+            .Take(20)
             .Include(recipe => recipe.Recipe.Comments)!
             .ThenInclude(comment => comment.User)
             .Include(recipe => recipe.Recipe.Likes)
